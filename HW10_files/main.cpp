@@ -1,11 +1,14 @@
 #include <iostream>
 #include "directory.h"
+#include <vector>
+
 using namespace std;
 int main() {
 	{
-		Directory mydir;
-		mydir.add();
-		cout << mydir.data[0];
+		Directory dir;
+		dir.show_all();
+		
+		
 	}
 	system("pause");
 	return 0;

@@ -2,9 +2,10 @@
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #pragma warning(disable:4996)
 using namespace std;
-#define ADD_AUTO "ON"
+//#define ADD_AUTO "ON"
 //help functions
 void genword(char *tmp, int size, char first, char last) {
 	for (int i = 0; i < size; i++) {
@@ -14,11 +15,24 @@ void genword(char *tmp, int size, char first, char last) {
 	tmp[size - 1] = 0;
 	
 }
+char* trueinput(const char *name) {
+	char tmp[256];
+	while (true) {
+		cout << name<<": ";
+		cin.getline(tmp, 255);
+		if (strstr(tmp, "#") || strstr(tmp, "&")) cout << "Incorrect input!\n";
+		else break;
+	}
+	char *value = new char[strlen(tmp) + 1];
+	strcpy(value, tmp);
+	return value;
+
+}
 //class Data
 Data::Data() {
 	firm_name = owner = phone_number = 0;
 	firm_adress = kind_of_activity = 0;
-	cout << "new Data: " << (int)this << endl;
+	//cout << "new Data: " << (int)this << endl;
 }
 Data::Data(const Data &dt) {
 	if (dt.firm_name) {
@@ -51,10 +65,10 @@ Data::Data(const Data &dt) {
 	}
 	else
 		kind_of_activity = 0;
-	cout << "new copy Data: " << (int)this << endl;
+	//cout << "new copy Data: " << (int)this << endl;
 }
 Data::~Data() {
-	cout << "free Data: " << (int)this << endl;
+	//cout << "free Data: " << (int)this << endl;
 	freeData();
 }
 void Data::freeData() {
@@ -67,9 +81,13 @@ void Data::freeData() {
 ostream& operator<<(ostream& out, const Data& dt) {
 	if (&dt==0)
 		return out;
-	out << dt.firm_name << '\t' << dt.firm_adress << '\t'
-		<< dt.owner << '\t' << dt.phone_number
-		<< endl;
+	out << "\n--------------------------\n"
+		<<"firm_name: "<< dt.firm_name << '\n'
+		<<"firm_adress: "<< dt.firm_adress << '\n'
+		<<"owner: "<< dt.owner << '\n'
+		<<"phone_number: "<< dt.phone_number << '\n'
+		<<"kind_of_activity: "<< dt.kind_of_activity
+		<< "\n==========================\n";
 	return out;
 }
 //class Directory
@@ -78,11 +96,11 @@ void Directory::add() {
 #ifdef ADD_AUTO //auto fill
 	srand(time(0));
 	int size;
-	size = rand() % (17) + 10;
-	dt.firm_adress = new char[size];
-	genword(dt.firm_adress, size, 'a', 'z');
+	size = rand() % (5) + 5;
+	dt.firm_name = new char[size];
+	genword(dt.firm_name, size, 'a', 'z');
 
-	size = rand() % (17) + 3;
+	size = rand() % (10) + 3;
 	dt.owner = new char[size];
 	genword(dt.owner, size, 'a', 'z');
 
@@ -101,13 +119,73 @@ void Directory::add() {
 	genword(dt.kind_of_activity, size, 'a', 'z');
 	dt.kind_of_activity[7] = ' ';
 #else //user input 
-
+	cout << "\n-------put value (ecept # and & simbols)-----------\n";
+	dt.firm_name=trueinput("firm_name");
+	dt.firm_adress=trueinput("firm_adress");
+	dt.owner=trueinput("owner");
+	dt.phone_number=trueinput("phone_number");
+	dt.kind_of_activity=trueinput("kind_of_activity");
+	cout<<"\n==========================\n";
 #endif // !ADD_AUTO
 	data.push_back(dt);
+	
+	//save to file dir.txt
+	ofstream out;
+	out.open("dir.txt", ios::app);
+	if (!out)
+		return;
+	out << '#';
+	out << dt.firm_name << '&';
+	out << dt.owner << '&';
+	out << dt.phone_number << '&';
+	out << dt.firm_adress << '&';
+	out << dt.kind_of_activity << endl;
+	out.close();
+
 }
 void Directory::show_all() {
 	for (Data dt : data)
 		cout << dt;
 	
+}
+Directory::Directory() {
+	ifstream in;
+	in.open("dir.txt");
+	if (!in)//error open file
+		return;
+	char c;//for #,&,\n
+	char buf[256];
+	Data dt;
+	while (in) {
+		in >> c;//out << '#';
+		if (!in)
+			break;
+		//dt.firm_name << '&';
+		in.getline(buf, 255, '&');//with space
+		dt.firm_name = new char[strlen(buf)+1];
+		strcpy(dt.firm_name, buf);
+		//out << dt.owner << '&';
+		in.getline(buf, 255, '&');//with space
+		dt.owner = new char[strlen(buf) + 1];
+		strcpy(dt.owner, buf);
+		//out << dt.phone_number << '&';
+		in.getline(buf, 255, '&');//with space
+		dt.phone_number = new char[strlen(buf) + 1];
+		strcpy(dt.phone_number, buf);
+		//out << dt.firm_adress << '&';
+		in.getline(buf, 255, '&');//with space
+		dt.firm_adress = new char[strlen(buf) + 1];
+		strcpy(dt.firm_adress, buf);
+		//out << dt.kind_of_activity << endl;
+		in.getline(buf, 255);//with space		\n !!! end line
+		dt.kind_of_activity = new char[strlen(buf) + 1];
+		strcpy(dt.kind_of_activity, buf);
+		//add to vector
+		data.push_back(dt);
+		
+	}
+
+	in.close();
+
 }
 

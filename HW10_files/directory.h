@@ -4,6 +4,7 @@
 using namespace std;
 #ifndef DIRECTORY_H
 #define DIRECTORY_H
+void genword(char* tmp, int size, char first, char last);
 struct Data {
 	char* firm_name;
 	char* owner;
@@ -27,6 +28,8 @@ public:
 	void f_kind_of_activity();
 	void show_all();
 	void add();
+	//constructors & destructors
+	Directory();
 };
 
 #endif // !DIRECTORY_H
